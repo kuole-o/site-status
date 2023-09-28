@@ -91,7 +91,11 @@ const SiteStatus = ({ siteData, days, status }) => {
                     })}
                   </div>
                   <div className="summary">
-                    <div className="now">今天</div>
+                    <div className="day">
+                      {site.daily[site.daily.length - 1].date.format(
+                        "YYYY-MM-DD"
+                      )}
+                    </div>
                     <div className="note">
                       {site.total.times
                         ? `最近 ${days} 天内故障 ${
@@ -101,11 +105,7 @@ const SiteStatus = ({ siteData, days, status }) => {
                           )}，平均可用率 ${site.average}%`
                         : `最近 ${days} 天内可用率 ${site.average}%`}
                     </div>
-                    <div className="day">
-                      {site.daily[site.daily.length - 1].date.format(
-                        "YYYY-MM-DD"
-                      )}
-                    </div>
+                    <div className="now">今天</div>
                   </div>
                 </div>
               ))}

@@ -19,8 +19,23 @@ const App = observer(() => {
   const getSiteStatusData = () => {
     setSiteData(null);
     getSiteData(apiKey, countDays, cache, status).then((res) => {
-      console.log(res);
-      setSiteData(res);
+      //console.log(res);
+
+      // 对每个站点的 daily 数组按 date 值升序排序
+      const sortedRes = res.map((site) => {
+        // 使用slice()创建daily的副本以防止修改原始数据
+        const sortedDaily = site.daily.slice().sort((a, b) => {
+          // 将日期字符串转换为日期对象进行比较
+          const dateA = new Date(a.date);
+          const dateB = new Date(b.date);
+          return dateA - dateB;
+        });
+
+        // 返回新的站点对象，daily已排序
+        return { ...site, daily: sortedDaily };
+      });
+      console.log(sortedRes);
+      setSiteData(sortedRes);
     });
   };
 
