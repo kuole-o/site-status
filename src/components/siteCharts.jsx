@@ -5,7 +5,7 @@ import { Line } from "@ant-design/plots";
 const SiteCharts = ({ siteDetails }) => {
   // 处理传入数据为图表
   const dailyData = siteDetails.daily;
-  const chartData = [...dailyData].reverse().map((data) => {
+  const chartData = [...dailyData].map((data) => {
     const { uptime, date } = data;
     return {
       time: date.format("YYYY-MM-DD"),
@@ -13,7 +13,7 @@ const SiteCharts = ({ siteDetails }) => {
     };
   });
 
-  // 图标配置
+  // 图表配置
   const chartConfig = {
     data: chartData,
     padding: "auto",
