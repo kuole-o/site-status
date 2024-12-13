@@ -47,7 +47,6 @@ const App = observer(() => {
     <>
       <GlobalScrollbar />
       <Header getSiteData={getSiteStatusData} />
-      <script defer src="https://umami.guole.fun/script.js" data-website-id="d337c356-29f1-406f-b425-3cc7c0ddd5e5" data-domains="status.guole.fun"></script>
       <main id="main">
         <div className="container">
           <div className="all-site">
