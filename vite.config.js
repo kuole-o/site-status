@@ -36,7 +36,7 @@ export default ({ mode }) =>
         manifest: {
           name: loadEnv(mode, process.cwd()).VITE_SITE_NAME,
           short_name: loadEnv(mode, process.cwd()).VITE_SITE_NAME,
-          description: "站点监测",
+          description: loadEnv(mode, process.cwd()).VITE_SITE_DES,
           display: "standalone",
           start_url: "/",
           theme_color: "#fff",
@@ -57,6 +57,9 @@ export default ({ mode }) =>
       alias: {
         "@": "/src",
       },
+    },
+    server: {
+      port: 6598,
     },
     build: {
       minify: "terser",

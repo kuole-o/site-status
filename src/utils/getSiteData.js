@@ -13,7 +13,7 @@ import dayjs from "dayjs";
 export const getSiteData = async (apikey, days, cache, status) => {
   try {
     status.changeSiteState("loading");
-    
+
     const dates = [];
     const today = dayjs(new Date().setHours(0, 0, 0, 0));
 
@@ -109,6 +109,19 @@ const getMonitorsData = async (postdata, status) => {
  * @returns {Array} - 处理后的数据
  */
 const dataProcessing = (data, dates) => {
+  try {
+    let siteSortArr = import.meta.env.VITE_SITE_SORT;
+    siteSortArr = siteSortArr.split(",").map(v => v.trim()).reverse();
+
+    data = data.sort((v1, v2) => {
+      const i1 = siteSortArr.indexOf(v1.friendly_name.trim()) + 1;
+      const i2 = siteSortArr.indexOf(v2.friendly_name.trim()) + 1;
+      return (i2 == -1 ? 0 : i2) - (i1 == -1 ? 0 : i1);
+    });
+  } catch (error) {
+    console.error("处理网站监控数据排序时出错：", error);
+  }
+
   return data?.map((monitor) => {
     const ranges = monitor.custom_uptime_ranges.split("-");
     const average = formatNumber(ranges.pop());
@@ -175,6 +188,9 @@ const changeSite = (data, status) => {
     const isAnyStatusOk = data.some((item) => item.status === "ok");
     const okCount = data.filter((item) => item.status === "ok").length;
     const downCount = data.filter((item) => item.status === "down").length;
+    const unknownCount = data.filter(
+      (item) => item.status === "unknown"
+    ).length;
 
     // 更改图标
     const faviconLink = document.querySelector('link[rel="shortcut icon"]');
@@ -196,6 +212,7 @@ const changeSite = (data, status) => {
       count: data.length,
       okCount,
       downCount,
+      unknownCount,
     });
   } catch (error) {
     console.error("更改站点状态时发生错误：", error);
