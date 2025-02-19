@@ -72,39 +72,89 @@ const setSiteLang = (lang: string) => {
   useHead({ htmlAttrs: { lang } });
 };
 
-// 监听站点状态
+// 定义状态颜色映射
+const statusColors: Record<string, { light: string; dark: string }> = {
+  normal: {
+    light: '#3bd672',
+    dark: '#2abf5b',
+  },
+  warn: {
+    light: '#f39c12',
+    dark: '#d68a0e',
+  },
+  error: {
+    light: '#de484a',
+    dark: '#b83a3e',
+  },
+  loading: {
+    light: '#58d0ff',
+    dark: '#46b3e0',
+  },
+  unknown: {
+    light: '#7f8c8d',
+    dark: '#636c6f',
+  },
+};
+
+// 设置状态栏颜色
+const getStatusBarColor = (siteStatus: string, preference: string, osTheme: string | null, scrollTop: number) => {
+  let finalMode = preference;
+  if (preference === 'system') {
+    finalMode = osTheme || 'light';
+  }
+
+  if (scrollTop > 0) {
+    return finalMode === 'light' ? '#ffffff' : '#424242';
+  }
+  // 获取对应的颜色
+  const color = statusColors[siteStatus]?.[finalMode as 'light' | 'dark'];
+  return color || '#ffffff';
+};
+
+// 监听站点状态 / 明暗模式 / 滚动变化
+let previousStatus = statusStore.siteStatus || 'unknown';
 watch(
-  () => statusStore.siteStatus,
-  (status) => {
-    const { siteTitle } = config.public;
-    // 错误数据
-    const isError = status === "error" || status === "warn";
-    const error = statusStore.siteData?.status?.error || 0;
-    const unknown = statusStore.siteData?.status?.unknown || 0;
-    // 更改信息
-    useHead({
-      // 更改标题
-      title: isError ? `( ${error + unknown} ) ` + siteTitle : siteTitle,
-    });
-    // 更改图标
-    useFavicon(isError ? "/favicon-error.ico" : "/favicon.ico");
+  () => [statusStore.siteStatus, colorMode.preference, osTheme.value, statusStore.scrollTop],
+  (newValues) => {
+    const [status, preference, osThemeValue, scrollTop] = newValues;
+    const color = getStatusBarColor(status, preference, osThemeValue, scrollTop);
+    const isDarkMode = colorMode.preference === 'dark' || (colorMode.preference === 'system' && osTheme.value === 'dark');
+    
+    // 设置 data-theme 属性
+    document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
+
+    // 设置 <meta name="theme-color">
+    const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+    if (metaThemeColor) {
+      metaThemeColor.setAttribute('content', color);
+    } else {
+      // 若无 meta 标签，则创建一个
+      const newMeta = document.createElement('meta');
+      newMeta.name = 'theme-color';
+      newMeta.content = color;
+      document.head.appendChild(newMeta);
+    }
+
+    if (previousStatus !== status) {
+      const { siteTitle } = config.public;
+      // 错误数据
+      const isError = status === "error" || status === "warn";
+      const error = statusStore.siteData?.status?.error || 0;
+      const unknown = statusStore.siteData?.status?.unknown || 0;
+      // 更改信息
+      useHead({
+        // 更改标题
+        title: isError ? `( ${error + unknown} ) ` + siteTitle : siteTitle,
+      });
+      // 更改图标
+      useFavicon(isError ? "/favicon-error.ico" : "/favicon.ico");
+      previousStatus = status;
+    }
   },
 );
 
 // 语言更改
 watch(() => statusStore.siteLang, setSiteLang);
-
-// 监听明暗模式变化
-watch(
-  () => [colorMode.preference, osTheme.value],
-  (newValues) => {
-    const [preference, osThemeValue] = newValues;
-    const isDarkMode = preference === 'dark' || (preference === 'system' && osThemeValue === 'dark');
-
-    // 设置 data-theme 属性
-    document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
-  },
-);
 
 onBeforeMount(checkSite);
 
