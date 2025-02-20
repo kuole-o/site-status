@@ -75,24 +75,24 @@ const setSiteLang = (lang: string) => {
 // 定义状态颜色映射
 const statusColors: Record<string, { light: string; dark: string }> = {
   normal: {
-    light: '#3bd672',
-    dark: '#2abf5b',
+    light: '#2ecc71',
+    dark: '#24b24d',
   },
   warn: {
-    light: '#f39c12',
-    dark: '#d68a0e',
+    light: '#ffa500',
+    dark: '#cc8400',
   },
   error: {
-    light: '#de484a',
-    dark: '#b83a3e',
+    light: '#ff4b5c',
+    dark: '#cc3a4a',
   },
   loading: {
-    light: '#58d0ff',
-    dark: '#46b3e0',
+    light: '#00b0ff',
+    dark: '#0091cc',
   },
   unknown: {
     light: '#7f8c8d',
-    dark: '#636c6f',
+    dark: '#6c7c7c',
   },
 };
 
@@ -112,12 +112,12 @@ const getStatusBarColor = (siteStatus: string, preference: string, osTheme: stri
 };
 
 // 监听站点状态 / 明暗模式 / 滚动变化
-let previousStatus = statusStore.siteStatus || 'unknown';
+let previousStatus = statusStore.siteStatus as string || 'unknown';
 watch(
   () => [statusStore.siteStatus, colorMode.preference, osTheme.value, statusStore.scrollTop],
   (newValues) => {
     const [status, preference, osThemeValue, scrollTop] = newValues;
-    const color = getStatusBarColor(status, preference, osThemeValue, scrollTop);
+    const color = getStatusBarColor(status as string, preference as string, osThemeValue as string | null, scrollTop as number);
     const isDarkMode = colorMode.preference === 'dark' || (colorMode.preference === 'system' && osTheme.value === 'dark');
     
     // 设置 data-theme 属性
@@ -148,7 +148,7 @@ watch(
       });
       // 更改图标
       useFavicon(isError ? "/favicon-error.ico" : "/favicon.ico");
-      previousStatus = status;
+      previousStatus = status as string;
     }
   },
 );
